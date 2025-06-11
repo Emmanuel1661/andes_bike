@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "jsbarcode": "^3.11.6",
+    "jspdf": "^3.0.1",
+    "qrcode.react": "^4.2.0",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1"
+  }
+}
