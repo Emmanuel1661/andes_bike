@@ -23,8 +23,12 @@ jobs:
         run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
-      - name: Build Docker Image
-        run: docker build -t emmanuel142/andesbike-frontend:0.0.2 ./frontend
+      - name: Build Docker Image with tags
+        run: |
+          docker build -t emmanuel142/andesbike-frontend:0.0.2 \
+                       -t emmanuel142/andesbike-frontend:latest ./frontend
 
       - name: Push Docker Image
-        run: docker push emmanuel142/andesbike-frontend:0.0.2
+        run: |
+          docker push emmanuel142/andesbike-frontend:0.0.2
+          docker push emmanuel142/andesbike-frontend:latest
