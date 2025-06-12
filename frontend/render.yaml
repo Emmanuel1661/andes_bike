@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: andesbike
-    env: static
-    staticPublishPath: dist
-    buildCommand: npm run build
+    name: andesbike-frontend
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
     routes:
       - type: rewrite
-        source: /(.*)
+        source: /*
         destination: /index.html
