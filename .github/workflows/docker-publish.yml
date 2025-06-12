@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the Docker image
-        run: docker build -t emmanuel142/andesbike-frontend:latest .
+        run: docker build -t emmanuel142/andesbike-frontend:latest ./frontend
 
       - name: Push the Docker image
         run: docker push emmanuel142/andesbike-frontend:latest
