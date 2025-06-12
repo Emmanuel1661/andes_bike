@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -18,27 +16,19 @@ jobs:
         id: version
         uses: PaulHatch/semantic-version@v4.0.3
         with:
-          major_pattern: "major"
-          minor_pattern: "feat"
+          major_pattern: "^major:"
+          minor_pattern: "^feat:"
           format: "${{major}}.${{minor}}.${{patch}}"
 
       - name: Docker login
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
 
-      - name: Build Docker Image with semantic version and latest
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
+      - name: Build and push Docker image
         run: |
-          docker build -t emmanuel142/andesbike-frontend:$VERSION \
-                       -t emmanuel142/andesbike-frontend:latest ./frontend
-
-      - name: Push Docker Image
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          docker push emmanuel142/andesbike-frontend:$VERSION
+          docker build -t emmanuel142/andesbike-frontend:${{ steps.version.outputs.version }} .
+          docker tag emmanuel142/andesbike-frontend:${{ steps.version.outputs.version }} emmanuel142/andesbike-frontend:latest
+          docker push emmanuel142/andesbike-frontend:${{ steps.version.outputs.version }}
           docker push emmanuel142/andesbike-frontend:latest
