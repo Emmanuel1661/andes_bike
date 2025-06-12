@@ -18,7 +18,7 @@ jobs:
         with:
           major_pattern: "^major:"
           minor_pattern: "^feat:"
-          format: "${{major}}.${{minor}}.${{patch}}"
+          format: "${{steps.semantic.outputs.major}}.${{steps.semantic.outputs.minor}}.${{steps.semantic.outputs.patch}}"
 
       - name: Docker login
         env:
