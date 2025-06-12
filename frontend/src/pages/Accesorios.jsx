@@ -11,17 +11,14 @@ import ModalConfirmacion from "../components/ModalConfirmacion";
 const ITEMS_PER_PAGE = 6;
 const ADMIN_EMAIL = "emanuelotero710@gmail.com";
 
-// Tarjeta individual de accesorio (responsive y con acciones)
 function AccesorioCard({ accesorio, addToCart, navigate, user, handleEliminarClick }) {
   const [cantidad, setCantidad] = useState(1);
 
-  // Ajusta la cantidad seleccionada si cambia el stock
   useEffect(() => {
     if (accesorio.stock && cantidad > accesorio.stock) setCantidad(accesorio.stock);
     if ((accesorio.stock || 0) < 1) setCantidad(1);
   }, [accesorio.stock]);
 
-  // Agrega el producto al carrito
   const handleAddToCart = (e) => {
     e.stopPropagation();
     addToCart({ ...accesorio, qty: cantidad });
@@ -33,7 +30,6 @@ function AccesorioCard({ accesorio, addToCart, navigate, user, handleEliminarCli
       className="relative bg-white rounded-3xl shadow-2xl p-6 xs:p-8 flex flex-col items-center hover:scale-105 hover:shadow-3xl transition cursor-pointer min-h-[410px] sm:min-h-[440px] max-w-[390px] sm:max-w-[420px] w-full"
       onClick={() => navigate(`/producto/${accesorio.id}`)}
     >
-      {/* Botones admin solo para el admin */}
       {user && user.email === ADMIN_EMAIL && (
         <div className="absolute top-4 right-4 flex gap-2 z-10">
           <Link
@@ -56,31 +52,27 @@ function AccesorioCard({ accesorio, addToCart, navigate, user, handleEliminarCli
           </button>
         </div>
       )}
-      {/* Imagen principal */}
       <div className="w-full h-56 xs:h-64 flex items-center justify-center bg-gray-100 rounded-xl mb-4 xs:mb-5 overflow-hidden">
         <img
           src={accesorio.imagen || "https://via.placeholder.com/400x250?text=Accesorio"}
           alt={accesorio.nombre}
-          className="object-contain w-full h-full"
+          className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
           style={{ maxHeight: "240px" }}
           loading="lazy"
         />
       </div>
-      {/* Nombre */}
       <div className="font-extrabold text-xl xs:text-2xl md:text-3xl mb-1 text-neutral-900 text-center drop-shadow">
         {accesorio.nombre}
       </div>
-      {/* Precio */}
       <div className="text-green-600 text-2xl xs:text-3xl font-bold mt-1 text-center drop-shadow">
         {Number(accesorio.precio).toLocaleString("es-CO")}
       </div>
-      {/* Marca */}
       <div className="text-base text-yellow-600 font-semibold mt-2 text-center tracking-wide">
         {accesorio.marca}
       </div>
-      {/* Descripción corta */}
-      <div className="text-gray-500 text-sm xs:text-base text-center mb-1 line-clamp-2">{accesorio.descripcion}</div>
-      {/* Selector de cantidad y botón agregar */}
+      <div className="text-gray-500 text-sm xs:text-base text-center mb-1 line-clamp-2">
+        {accesorio.descripcion}
+      </div>
       <div className="flex items-center gap-2 justify-center mt-auto w-full pt-7 xs:pt-8">
         <button
           className="rounded-full w-8 h-8 xs:w-9 xs:h-9 flex items-center justify-center text-xl xs:text-2xl font-black
@@ -107,24 +99,28 @@ function AccesorioCard({ accesorio, addToCart, navigate, user, handleEliminarCli
           disabled={cantidad >= (accesorio.stock || 1) || (accesorio.stock || 0) === 0}
           aria-label="Más"
         >+</button>
-        <button
-          onClick={handleAddToCart}
-          className="bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-3 shadow-xl hover:scale-110 active:scale-95 transition-all duration-150 ml-2"
-          title="Agregar al carrito"
-          disabled={(accesorio.stock || 0) === 0}
-        >
-          <FaShoppingCart size={22} />
-        </button>
+        {(accesorio.stock || 0) > 0 ? (
+          <button
+            onClick={handleAddToCart}
+            className="bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-3 shadow-xl hover:scale-110 active:scale-95 transition-all duration-150 ml-2"
+            title="Agregar al carrito"
+            disabled={(accesorio.stock || 0) === 0}
+          >
+            <FaShoppingCart size={22} />
+          </button>
+        ) : (
+          <span className="ml-2 text-red-600 font-bold text-base px-3 xs:px-4 py-2 bg-red-100 rounded-lg shadow animate-pulse">
+            AGOTADO
+          </span>
+        )}
       </div>
-      {/* Stock disponible */}
       <div className="text-xs text-gray-500 mt-1 mb-1">
-        {(accesorio.stock || 0) > 0 ? `Disponibles: ${accesorio.stock}` : "Sin stock"}
+        {(accesorio.stock || 0) > 0 ? `Disponibles: ${accesorio.stock}` : ""}
       </div>
     </div>
   );
 }
 
-// Página principal de accesorios, con paginación y búsqueda global
 export default function Accesorios() {
   const [accesorios, setAccesorios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,7 +133,6 @@ export default function Accesorios() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Cargar los accesorios desde Supabase y el usuario logueado
   useEffect(() => {
     const fetchAccesorios = async () => {
       setLoading(true);
@@ -153,7 +148,6 @@ export default function Accesorios() {
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
-  // Filtrar accesorios según búsqueda global
   const accesoriosFiltrados = accesorios.filter((accesorio) =>
     (
       accesorio.nombre +
@@ -166,14 +160,12 @@ export default function Accesorios() {
       .includes(search.toLowerCase())
   );
 
-  // Paginación responsive
   const totalPages = Math.max(1, Math.ceil(accesoriosFiltrados.length / ITEMS_PER_PAGE));
   const productosPagina = accesoriosFiltrados.slice(
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE
   );
 
-  // Eliminar accesorio: muestra modal de confirmación
   const handleEliminarConfirm = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
@@ -188,7 +180,6 @@ export default function Accesorios() {
       <h1 className="text-3xl xs:text-4xl font-extrabold mb-8 text-center text-yellow-600 drop-shadow">
         Accesorios
       </h1>
-      {/* Grid responsive: 1 columna móvil, 2 en sm, 3 en md+ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 xs:gap-10 md:gap-12 place-items-center w-full">
         {loading ? (
           <div className="col-span-3 text-2xl text-gray-700 font-semibold">Cargando accesorios...</div>
@@ -207,7 +198,6 @@ export default function Accesorios() {
           ))
         )}
       </div>
-      {/* Modal visual para eliminar */}
       <ModalConfirmacion
         abierto={!!deleteId}
         titulo="Confirmar eliminación"
@@ -218,7 +208,6 @@ export default function Accesorios() {
         onCancelar={() => setDeleteId(null)}
         loading={deleteLoading}
       />
-      {/* Paginación responsive */}
       <div className="flex items-center justify-center mt-8 gap-8">
         <button
           className="rounded-full border-2 border-yellow-400 p-3 text-2xl font-bold transition disabled:opacity-40"

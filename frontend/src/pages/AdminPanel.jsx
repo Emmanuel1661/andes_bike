@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import AlertasStock from "./AlertasStock";
 
 function EditFacturaModal({ factura, onClose, onSave }) {
-  
+  // Aquí va la implementación si la tienes
+  return null; // placeholder
 }
 
 export default function AdminPanel() {
@@ -87,12 +88,13 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-12 mb-24 animate-fade-in">
-      {/* TABS: Productos | Facturas | Alertas Stock */}
-      <div className="flex gap-4 mb-10 justify-center">
+    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 mt-12 mb-24 animate-fade-in">
+
+      {/* Tabs */}
+      <div className="flex gap-4 mb-8 justify-center flex-wrap">
         <button
           onClick={() => setTab("productos")}
-          className={`px-6 py-2 rounded-t-lg font-bold border-b-4 ${tab === "productos"
+          className={`px-5 py-2 rounded-t-lg font-bold border-b-4 ${tab === "productos"
             ? "border-yellow-500 bg-white text-yellow-800 shadow"
             : "border-transparent bg-gray-100 text-gray-500"
             } transition`}
@@ -101,7 +103,7 @@ export default function AdminPanel() {
         </button>
         <button
           onClick={() => setTab("facturas")}
-          className={`px-6 py-2 rounded-t-lg font-bold border-b-4 ${tab === "facturas"
+          className={`px-5 py-2 rounded-t-lg font-bold border-b-4 ${tab === "facturas"
             ? "border-yellow-500 bg-white text-yellow-800 shadow"
             : "border-transparent bg-gray-100 text-gray-500"
             } transition`}
@@ -110,7 +112,7 @@ export default function AdminPanel() {
         </button>
         <button
           onClick={() => setTab("alertas")}
-          className={`px-6 py-2 rounded-t-lg font-bold border-b-4 ${tab === "alertas"
+          className={`px-5 py-2 rounded-t-lg font-bold border-b-4 ${tab === "alertas"
             ? "border-yellow-500 bg-white text-yellow-800 shadow"
             : "border-transparent bg-gray-100 text-gray-500"
             } transition`}
@@ -119,47 +121,49 @@ export default function AdminPanel() {
         </button>
       </div>
 
-      {/* TAB CONTENIDO */}
+      {/* Contenido */}
       {tab === "productos" && (
         <div>
           <h2 className="text-3xl font-bold mb-6 text-center">Panel de Administración</h2>
-          {/* <--- BOTÓN CENTRADO */}
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-6">
             <Link
               to="/admin/productos/nuevo"
-              className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg inline-block"
+              className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
             >
               + Nuevo Producto
             </Link>
           </div>
-          <div className="mb-2 flex justify-end">
+
+          <div className="mb-4 flex justify-end">
             <input
               type="text"
               placeholder="Buscar por nombre, ID o tipo..."
-              className="border px-3 py-2 rounded-lg w-80"
+              className="border px-3 py-2 rounded-lg w-full max-w-md"
               value={filtro}
               onChange={e => setFiltro(e.target.value)}
             />
           </div>
-          <div className="mb-2 text-gray-700 text-right">
-            Total productos: <b>{productosFiltrados.length}</b>
+
+          <div className="mb-4 text-gray-700 text-right font-semibold">
+            Total productos: <span className="font-bold">{productosFiltrados.length}</span>
           </div>
+
           {loading ? (
-            <div>Cargando productos...</div>
+            <div className="text-center py-6">Cargando productos...</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full mt-2 text-left bg-white rounded-lg shadow">
-                <thead>
+            <div className="overflow-x-auto rounded-lg shadow-md">
+              <table className="min-w-full table-auto border-collapse bg-white">
+                <thead className="bg-gray-100 text-gray-700 font-semibold text-sm">
                   <tr>
-                    <th className="py-2 px-3">ID</th>
-                    <th className="py-2 px-3">Nombre</th>
-                    <th className="py-2 px-3">Precio</th>
-                    <th className="py-2 px-3">Tipo</th>
-                    <th className="py-2 px-3">Descripción</th>
-                    <th className="py-2 px-3">Acciones</th>
+                    <th className="py-2 px-3 border border-gray-300">ID</th>
+                    <th className="py-2 px-3 border border-gray-300">Nombre</th>
+                    <th className="py-2 px-3 border border-gray-300">Precio</th>
+                    <th className="py-2 px-3 border border-gray-300">Tipo</th>
+                    <th className="py-2 px-3 border border-gray-300">Descripción</th>
+                    <th className="py-2 px-3 border border-gray-300">Acciones</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-sm">
                   {productosFiltrados.length === 0 ? (
                     <tr>
                       <td colSpan="6" className="text-center py-6 text-gray-500">
@@ -168,13 +172,13 @@ export default function AdminPanel() {
                     </tr>
                   ) : (
                     productosFiltrados.map((producto) => (
-                      <tr key={producto.id} className="border-t">
-                        <td className="py-2 px-3">{producto.id}</td>
-                        <td className="py-2 px-3">{producto.nombre}</td>
-                        <td className="py-2 px-3">{producto.precio?.toLocaleString("es-CO")}</td>
-                        <td className="py-2 px-3">{producto.tipo}</td>
-                        <td className="py-2 px-3">{producto.descripcion || "-"}</td>
-                        <td className="py-2 px-3 flex gap-2">
+                      <tr key={producto.id} className="border-t hover:bg-yellow-50">
+                        <td className="py-2 px-3 border border-gray-300 break-words max-w-xs">{producto.id}</td>
+                        <td className="py-2 px-3 border border-gray-300">{producto.nombre}</td>
+                        <td className="py-2 px-3 border border-gray-300">{producto.precio?.toLocaleString("es-CO")}</td>
+                        <td className="py-2 px-3 border border-gray-300">{producto.tipo}</td>
+                        <td className="py-2 px-3 border border-gray-300 truncate max-w-[160px]" title={producto.descripcion || ""}>{producto.descripcion || "-"}</td>
+                        <td className="py-2 px-3 border border-gray-300 flex gap-2 flex-wrap justify-center">
                           <Link
                             to={`/admin/productos/editar/${producto.id}`}
                             className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg min-w-[90px] text-center"
@@ -200,30 +204,30 @@ export default function AdminPanel() {
 
       {tab === "facturas" && (
         <div className="w-full bg-white rounded-2xl shadow p-6 mt-4 animate-fade-in">
-          <div className="flex items-center mb-4">
-            <h3 className="text-2xl font-bold mr-6 flex-1">Historial de Ventas / Facturas</h3>
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+            <h3 className="text-2xl font-bold flex-1 text-center sm:text-left">Historial de Ventas / Facturas</h3>
             <input
               type="text"
               placeholder="Buscar cliente, correo o ID factura..."
-              className="border px-3 py-2 rounded-lg w-80"
+              className="border px-3 py-2 rounded-lg w-full sm:w-80"
               value={filtroFactura}
               onChange={e => setFiltroFactura(e.target.value)}
             />
           </div>
           {loadingFacturas ? (
-            <div>Cargando facturas...</div>
+            <div className="text-center py-6">Cargando facturas...</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm bg-white rounded-lg shadow">
-                <thead>
-                  <tr className="bg-gray-100 text-gray-700">
-                    <th className="py-2 px-3">ID Factura</th>
-                    <th className="py-2 px-3">Cliente</th>
-                    <th className="py-2 px-3">Correo</th>
-                    <th className="py-2 px-3">Total</th>
-                    <th className="py-2 px-3">Fecha</th>
-                    <th className="py-2 px-3">Ver PDF</th>
-                    <th className="py-2 px-3">Acciones</th>
+            <div className="overflow-x-auto rounded-lg shadow-md">
+              <table className="min-w-full table-auto border-collapse bg-white text-sm">
+                <thead className="bg-gray-100 text-gray-700 font-semibold text-sm">
+                  <tr>
+                    <th className="py-2 px-3 border border-gray-300">ID Factura</th>
+                    <th className="py-2 px-3 border border-gray-300">Cliente</th>
+                    <th className="py-2 px-3 border border-gray-300">Correo</th>
+                    <th className="py-2 px-3 border border-gray-300">Total</th>
+                    <th className="py-2 px-3 border border-gray-300">Fecha</th>
+                    <th className="py-2 px-3 border border-gray-300">Ver PDF</th>
+                    <th className="py-2 px-3 border border-gray-300">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,29 +239,22 @@ export default function AdminPanel() {
                     </tr>
                   ) : (
                     facturasFiltradas.map((factura) => (
-                      <tr key={factura.id} className="border-t">
-                        <td className="py-2 px-3">{factura.id}</td>
-                        <td className="py-2 px-3">{factura.pedidos?.usuarios?.nombre || "-"}</td>
-                        <td className="py-2 px-3">{factura.pedidos?.usuarios?.correo || "-"}</td>
-                        <td className="py-2 px-3 font-bold text-green-700">
-                          ${factura.pedidos?.total?.toLocaleString("es-CO") || "-"}
-                        </td>
-                        <td className="py-2 px-3">{new Date(factura.fecha_emision).toLocaleString("es-CO")}</td>
-                        <td className="py-2 px-3">
+                      <tr key={factura.id} className="border-t hover:bg-yellow-50">
+                        <td className="py-2 px-3 border border-gray-300 break-words max-w-xs">{factura.id}</td>
+                        <td className="py-2 px-3 border border-gray-300">{factura.pedidos?.usuarios?.nombre || "-"}</td>
+                        <td className="py-2 px-3 border border-gray-300">{factura.pedidos?.usuarios?.correo || "-"}</td>
+                        <td className="py-2 px-3 border border-gray-300 font-bold text-green-700">${factura.pedidos?.total?.toLocaleString("es-CO") || "-"}</td>
+                        <td className="py-2 px-3 border border-gray-300">{new Date(factura.fecha_emision).toLocaleString("es-CO")}</td>
+                        <td className="py-2 px-3 border border-gray-300">
                           {factura.archivo_url ? (
-                            <a
-                              href={factura.archivo_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-700 underline"
-                            >
+                            <a href={factura.archivo_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
                               Ver PDF
                             </a>
                           ) : (
                             <span className="text-gray-400">Sin archivo</span>
                           )}
                         </td>
-                        <td className="py-2 px-3 flex gap-2">
+                        <td className="py-2 px-3 border border-gray-300 flex gap-2 flex-wrap justify-center">
                           <button
                             className="px-3 py-1 bg-blue-500 hover:bg-blue-700 text-white rounded-lg min-w-[90px] text-center"
                             onClick={() => setEditFactura(factura)}
@@ -281,9 +278,7 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {tab === "alertas" && (
-        <AlertasStock />
-      )}
+      {tab === "alertas" && <AlertasStock />}
 
       {editFactura && (
         <EditFacturaModal

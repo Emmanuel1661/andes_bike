@@ -1,4 +1,3 @@
-// ✅ HEADER CON MENÚ DE USUARIO Y AVATAR
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
@@ -9,7 +8,6 @@ import {
   LogOut,
   User,
   Clock,
-  ChevronDown
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import LoginModal from "./LoginModal";
@@ -72,6 +70,7 @@ export default function Header({ searchGlobal, setSearchGlobal }) {
   return (
     <header className="bg-black text-white px-4 sm:px-6 md:px-8 py-4 md:py-8 shadow-xl border-b border-yellow-700/30 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-center max-w-screen-2xl mx-auto gap-3 md:gap-0">
+        {/* Logo */}
         <div className="flex flex-col items-center md:items-start">
           <Link to="/" className="focus:outline-none group">
             <span className="text-4xl xs:text-5xl sm:text-5xl md:text-6xl font-extrabold tracking-widest italic drop-shadow-2xl bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-400 bg-clip-text text-transparent animate-gradient-move group-hover:scale-105 group-hover:brightness-125 transition duration-150 cursor-pointer">
@@ -83,6 +82,7 @@ export default function Header({ searchGlobal, setSearchGlobal }) {
           </span>
         </div>
 
+        {/* Search bar */}
         <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mt-3 md:mt-0 flex-shrink">
           <div className="relative">
             <input
@@ -111,31 +111,61 @@ export default function Header({ searchGlobal, setSearchGlobal }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 xs:gap-7 md:gap-12 text-white mt-3 md:mt-0">
+        {/* User and icons */}
+        <div className="flex items-center gap-4 xs:gap-7 md:gap-12 mt-3 md:mt-0 relative">
           {user ? (
-            <div className="relative" ref={dropdownRef}>
+            <div
+              ref={dropdownRef}
+              className="relative w-10" // Contenedor relativo para avatar
+            >
               <div
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 className="bg-yellow-500 text-white font-bold rounded-full w-10 h-10 flex items-center justify-center text-sm cursor-pointer hover:brightness-110 relative"
               >
                 {getInitials(user.user_metadata?.nombre || user.user_metadata?.name || "Usuario")}
               </div>
+
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-lg overflow-hidden z-50">
-                  <div className="px-4 py-2 font-semibold border-b">{user.user_metadata?.nombre || user.user_metadata?.name}</div>
-                  <Link to="/perfil" className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm">
+                <div
+                  className="
+                    absolute mt-2
+                    left-1/2 -translate-x-1/2
+                    md:left-auto md:right-0 md:translate-x-0
+                    w-[90vw] max-w-[240px] sm:w-60 bg-white text-black rounded-xl shadow-xl z-50
+                  "
+                  style={{ minWidth: "160px" }}
+                >
+                  <div className="px-4 py-2 font-semibold border-b">
+                    {user.user_metadata?.nombre || user.user_metadata?.name}
+                  </div>
+                  <Link
+                    to="/perfil"
+                    className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm"
+                    onClick={() => setDropdownOpen(false)}
+                  >
                     <User className="w-4 h-4 mr-2" /> Perfil
                   </Link>
-                  <Link to="/mis-pedidos" className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm">
+                  <Link
+                    to="/mis-pedidos"
+                    className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm"
+                    onClick={() => setDropdownOpen(false)}
+                  >
                     <Clock className="w-4 h-4 mr-2" /> Mis pedidos
                   </Link>
                   {user.email === "emanuelotero710@gmail.com" && (
-                    <Link to="/admin" className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm">
+                    <Link
+                      to="/admin"
+                      className="flex items-center px-4 py-2 hover:bg-yellow-100 text-sm"
+                      onClick={() => setDropdownOpen(false)}
+                    >
                       <User className="w-4 h-4 mr-2" /> Admin
                     </Link>
                   )}
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      handleLogout();
+                    }}
                     className="flex items-center px-4 py-2 text-red-600 hover:bg-red-50 text-sm w-full"
                   >
                     <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
@@ -181,31 +211,91 @@ export default function Header({ searchGlobal, setSearchGlobal }) {
         </div>
       </div>
 
-      {/* Menús */}
       <nav className="mt-4 border-t border-yellow-600/40 pt-3">
         <ul className="hidden md:flex items-center justify-center gap-8 lg:gap-20 text-base sm:text-lg lg:text-2xl font-extrabold uppercase tracking-widest">
           <li className="relative">
-            <a href="/outlet" className="text-red-500 font-bold hover:scale-110 transition">OFFERS</a>
-            <span className="absolute -top-3 -right-6 bg-red-600 text-white text-xs px-1 rounded shadow font-bold tracking-tight animate-bounce">OFERTAS</span>
+            <a href="/outlet" className="text-red-500 font-bold hover:scale-110 transition">
+              OFFERS
+            </a>
+            <span className="absolute -top-3 -right-6 bg-red-600 text-white text-xs px-1 rounded shadow font-bold tracking-tight animate-bounce">
+              OFERTAS
+            </span>
           </li>
-          <li><a href="/bicicletas" className="hover:text-yellow-400">BICICLETAS</a></li>
-          <li><a href="/accesorios" className="hover:text-yellow-400">ACCESORIOS</a></li>
-          <li><a href="/repuestos" className="hover:text-yellow-400">REPUESTOS</a></li>
-          <li><a href="/ropa" className="hover:text-yellow-400">ROPA</a></li>
-          <li><a href="/realidad-aumentada" className="hover:text-yellow-400">REALIDAD AUMENTADA</a></li>
-          <li><a href="/contacto" className="hover:text-yellow-400">CONTACTO</a></li>
+          <li>
+            <a href="/bicicletas" className="hover:text-yellow-400">
+              BICICLETAS
+            </a>
+          </li>
+          <li>
+            <a href="/accesorios" className="hover:text-yellow-400">
+              ACCESORIOS
+            </a>
+          </li>
+          <li>
+            <a href="/repuestos" className="hover:text-yellow-400">
+              REPUESTOS
+            </a>
+          </li>
+          <li>
+            <a href="/ropa" className="hover:text-yellow-400">
+              ROPA
+            </a>
+          </li>
+          <li>
+            <a href="/realidad-aumentada" className="hover:text-yellow-400">
+              REALIDAD AUMENTADA
+            </a>
+          </li>
+          <li>
+            <a href="/contacto" className="hover:text-yellow-400">
+              CONTACTO
+            </a>
+          </li>
         </ul>
-        <ul className={`flex md:hidden items-center gap-3 sm:gap-7 text-xs xs:text-sm sm:text-base font-extrabold uppercase tracking-widest overflow-x-auto no-scrollbar transition-all duration-200 ${menuOpen ? "max-h-64 py-2" : "max-h-0 overflow-hidden py-0"}`}>
+
+        <ul
+          className={`flex md:hidden items-center gap-3 sm:gap-7 text-xs xs:text-sm sm:text-base font-extrabold uppercase tracking-widest overflow-x-auto no-scrollbar transition-all duration-200 ${
+            menuOpen ? "max-h-64 py-2" : "max-h-0 overflow-hidden py-0"
+          }`}
+        >
           <li className="relative min-w-fit">
-            <a href="/outlet" className="text-red-500 font-bold hover:scale-110 transition">SALIDA</a>
-            <span className="absolute -top-3 -right-6 bg-red-600 text-white text-xs px-1 rounded shadow font-bold tracking-tight animate-bounce">OFERTA</span>
+            <a href="/outlet" className="text-red-500 font-bold hover:scale-110 transition">
+              SALIDA
+            </a>
+            <span className="absolute -top-3 -right-6 bg-red-600 text-white text-xs px-1 rounded shadow font-bold tracking-tight animate-bounce">
+              OFERTA
+            </span>
           </li>
-          <li className="min-w-fit"><a href="/bicicletas" className="hover:text-yellow-400">BICICLETAS</a></li>
-          <li className="min-w-fit"><a href="/accesorios" className="hover:text-yellow-400">ACCESORIOS</a></li>
-          <li className="min-w-fit"><a href="/repuestos" className="hover:text-yellow-400">REPUESTOS</a></li>
-          <li className="min-w-fit"><a href="/ropa" className="hover:text-yellow-400">ROPA</a></li>
-          <li className="min-w-fit"><a href="/realidad-aumentada" className="hover:text-yellow-400">REALIDAD AUMENTADA</a></li>
-          <li className="min-w-fit"><a href="/contacto" className="hover:text-yellow-400">CONTACTO</a></li>
+          <li className="min-w-fit">
+            <a href="/bicicletas" className="hover:text-yellow-400">
+              BICICLETAS
+            </a>
+          </li>
+          <li className="min-w-fit">
+            <a href="/accesorios" className="hover:text-yellow-400">
+              ACCESORIOS
+            </a>
+          </li>
+          <li className="min-w-fit">
+            <a href="/repuestos" className="hover:text-yellow-400">
+              REPUESTOS
+            </a>
+          </li>
+          <li className="min-w-fit">
+            <a href="/ropa" className="hover:text-yellow-400">
+              ROPA
+            </a>
+          </li>
+          <li className="min-w-fit">
+            <a href="/realidad-aumentada" className="hover:text-yellow-400">
+              REALIDAD AUMENTADA
+            </a>
+          </li>
+          <li className="min-w-fit">
+            <a href="/contacto" className="hover:text-yellow-400">
+              CONTACTO
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -214,18 +304,38 @@ export default function Header({ searchGlobal, setSearchGlobal }) {
 
       <style>
         {`
-          @keyframes fade-in { from { opacity: 0; transform: translateY(-20px);} to { opacity: 1; transform: translateY(0);} }
-          .animate-fade-in { animation: fade-in 1.1s cubic-bezier(.16,1.2,.52,1.11); }
+          @keyframes fade-in {
+            from {
+              opacity: 0;
+              transform: translateY(-20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-fade-in {
+            animation: fade-in 1.1s cubic-bezier(0.16, 1.2, 0.52, 1.11);
+          }
           @keyframes gradient-move {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            0% {
+              background-position: 0% 50%;
+            }
+            100% {
+              background-position: 100% 50%;
+            }
           }
           .animate-gradient-move {
             background-size: 200% 100%;
             animation: gradient-move 2s infinite alternate linear;
           }
-          .no-scrollbar::-webkit-scrollbar { display: none; }
-          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
         `}
       </style>
     </header>

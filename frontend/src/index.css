@@ -6,18 +6,34 @@
 html,
 body,
 #root {
-  background-color: #000; /* Fondo negro, puedes cambiar a #f8fafc si prefieres claro */
+  background-color: #000;
   min-height: 100vh;
   width: 100vw;
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
   font-family: 'Arial', sans-serif;
-  /* Evita el scroll horizontal innecesario */
   overflow-x: hidden;
 }
 
-/* Animación de sombra para textos (opcional) */
+/* Corrige comportamiento de altura real en móviles */
+:root {
+  --vh: 100%;
+}
+@media screen and (max-width: 640px) {
+  :root {
+    --vh: 100dvh;
+  }
+}
+
+/* Evita que imágenes se desborden */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Animación opcional para texto */
 @keyframes textShadowPulse {
   0%, 100% {
     text-shadow: 0 0 10px #8b5cf6, 0 0 20px #a78bfa;
@@ -26,16 +42,14 @@ body,
     text-shadow: 0 0 20px #a78bfa, 0 0 30px #8b5cf6;
   }
 }
-
 .animate-text-shadow {
   animation: textShadowPulse 3s ease-in-out infinite;
 }
 
-/* Input y botón reutilizables si usas Tailwind con @apply */
+/* Clases personalizadas con @apply */
 .input {
   @apply border px-4 py-2 rounded outline-none focus:ring-2 focus:ring-yellow-400;
 }
-
 .btn {
   @apply bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 rounded transition;
 }

@@ -26,6 +26,13 @@ function BicicletaCard({ bici, addToCart, user, onDeleteClick }) {
     if ((bici.stock || 0) < 1) setCantidad(1);
   }, [bici.stock]);
 
+  let imagenPrincipal = "https://via.placeholder.com/400x250?text=Bicicleta";
+  if (bici.imagenes && Array.isArray(bici.imagenes) && bici.imagenes.length > 0) {
+    imagenPrincipal = bici.imagenes[0] || imagenPrincipal;
+  } else if (bici.imagen) {
+    imagenPrincipal = bici.imagen;
+  }
+
   return (
     <div
       className="
@@ -62,7 +69,7 @@ function BicicletaCard({ bici, addToCart, user, onDeleteClick }) {
       <Link to={`/bicicletas/${bici.id}`} className="w-full flex-1 flex flex-col">
         <div className="w-full h-56 xs:h-64 flex items-center justify-center bg-gray-100 rounded-xl mb-4 xs:mb-5 overflow-hidden">
           <img
-            src={bici.imagen || "https://via.placeholder.com/400x250?text=Bicicleta"}
+            src={imagenPrincipal}
             alt={bici.nombre}
             className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
             style={{ maxHeight: "240px" }}
@@ -141,14 +148,13 @@ export default function Bicicletas() {
   const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Consultar bicicletas desde la base de datos
   useEffect(() => {
     const fetchBicicletas = async () => {
       setLoading(true);
       setError("");
       let { data, error } = await supabase
         .from("productos")
-        .select("id, nombre, precio, imagen, tipo, especificaciones, categoria_id, stock")
+        .select("id, nombre, precio, imagen, imagenes, tipo, especificaciones, categoria_id, stock")
         .in("categoria_id", [1, 2, 3])
         .order("id", { ascending: true });
       if (error) setError(error.message);
@@ -158,13 +164,11 @@ export default function Bicicletas() {
     fetchBicicletas();
   }, []);
 
-  // Trae el usuario del localStorage (si está logueado)
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
-  // Filtro por búsqueda global
   const bicicletasFiltradas = bicicletas.filter((bici) =>
     (
       bici.nombre +
@@ -177,16 +181,13 @@ export default function Bicicletas() {
       .includes(search.toLowerCase())
   );
 
-  // Lógica de paginación (sólo muestra 6 por página)
   const totalPages = Math.max(1, Math.ceil(bicicletasFiltradas.length / PAGE_SIZE));
   const pagedBicis = bicicletasFiltradas.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // Si la página es mayor al total, ajusta a la última
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages, page]);
 
-  // Eliminar bicicleta (sólo admin)
   const handleDeleteConfirm = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
@@ -201,7 +202,6 @@ export default function Bicicletas() {
       <h1 className="text-3xl xs:text-4xl font-extrabold mb-8 text-center text-yellow-600 drop-shadow">
         Bicicletas
       </h1>
-      {/* Grid totalmente responsive: 1 columna en móvil, 2 en sm, 3 en md+ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 xs:gap-10 md:gap-12 place-items-center w-full">
         {loading ? (
           <div className="col-span-3 text-2xl text-gray-700 font-semibold">Cargando bicicletas...</div>
@@ -221,7 +221,6 @@ export default function Bicicletas() {
           ))
         )}
       </div>
-      {/* Modal para confirmar eliminación */}
       <ModalConfirmacion
         abierto={!!deleteId}
         mensaje="¿Deseas eliminar este producto?"
@@ -231,7 +230,6 @@ export default function Bicicletas() {
         onCancelar={() => setDeleteId(null)}
         loading={deleteLoading}
       />
-      {/* Paginación, adaptada a cualquier ancho */}
       <div className="flex items-center justify-center mt-8 gap-8">
         <button
           className="rounded-full border-2 border-yellow-400 p-3 text-2xl font-bold transition disabled:opacity-40"

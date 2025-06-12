@@ -24,7 +24,6 @@ function getGeneroIcono(genero) {
   return null;
 }
 
-// Card de prenda, responsive, con control de stock y botones admin
 function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
   const [cantidad, setCantidad] = useState(1);
 
@@ -39,16 +38,13 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
     setCantidad(1);
   };
 
+  const imagenPrincipal = producto.imagen || (producto.imagenes?.[0] || "https://via.placeholder.com/400x250?text=Ropa");
+
   return (
     <div
-      className="
-        relative bg-white rounded-3xl shadow-2xl p-6 xs:p-8 flex flex-col items-center
-        hover:scale-105 hover:shadow-3xl transition cursor-pointer
-        min-h-[410px] sm:min-h-[440px] max-w-[390px] sm:max-w-[420px] w-full
-      "
+      className="relative bg-white rounded-3xl shadow-2xl p-6 xs:p-8 flex flex-col items-center hover:scale-105 hover:shadow-3xl transition cursor-pointer min-h-[410px] sm:min-h-[440px] max-w-[390px] sm:max-w-[420px] w-full"
       onClick={() => navigate(`/producto/${producto.id}`)}
     >
-      {/* Botones admin */}
       {user && user.email === ADMIN_EMAIL && (
         <div className="absolute top-4 right-4 flex gap-2 z-10">
           <Link
@@ -71,17 +67,15 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
           </button>
         </div>
       )}
-      {/* Imagen */}
       <div className="w-full h-56 xs:h-64 flex items-center justify-center bg-gray-100 rounded-xl mb-4 xs:mb-5 overflow-hidden">
         <img
-          src={producto.imagen || "https://via.placeholder.com/400x250?text=Ropa"}
+          src={imagenPrincipal}
           alt={producto.nombre}
-          className="object-contain w-full h-full"
+          className="object-contain w-full h-full hover:scale-110 transition duration-200"
           style={{ maxHeight: "240px" }}
           loading="lazy"
         />
       </div>
-      {/* Nombre, precio, marca */}
       <div className="font-extrabold text-xl xs:text-2xl md:text-3xl mb-1 text-neutral-900 text-center drop-shadow">
         {producto.nombre}
       </div>
@@ -91,7 +85,6 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
       <div className="text-base text-yellow-600 font-semibold mt-2 text-center tracking-wide">
         {producto.marca}
       </div>
-      {/* Género */}
       <div className="mb-2 text-base text-gray-700 font-bold">
         {producto.genero && (
           <>
@@ -100,16 +93,12 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
           </>
         )}
       </div>
-      {/* Descripción breve */}
       <div className="text-gray-500 text-sm xs:text-base text-center mb-1 line-clamp-2">
         {producto.descripcion}
       </div>
-      {/* Selector cantidad y agregar */}
       <div className="flex items-center gap-2 justify-center mt-auto w-full pt-7 xs:pt-8">
         <button
-          className="rounded-full w-8 h-8 xs:w-9 xs:h-9 flex items-center justify-center text-xl xs:text-2xl font-black
-            bg-gradient-to-br from-gray-100 to-gray-300 border-2 border-gray-200 hover:border-yellow-500 shadow
-            hover:scale-110 active:scale-95 transition-all duration-100 text-yellow-600"
+          className="rounded-full w-8 h-8 xs:w-9 xs:h-9 flex items-center justify-center text-xl xs:text-2xl font-black bg-gradient-to-br from-gray-100 to-gray-300 border-2 border-gray-200 hover:border-yellow-500 shadow hover:scale-110 active:scale-95 transition-all duration-100 text-yellow-600"
           onClick={e => {
             e.stopPropagation();
             setCantidad((c) => Math.max(1, c - 1));
@@ -121,9 +110,7 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
           {cantidad}
         </span>
         <button
-          className="rounded-full w-8 h-8 xs:w-9 xs:h-9 flex items-center justify-center text-xl xs:text-2xl font-black
-            bg-gradient-to-br from-gray-100 to-gray-300 border-2 border-gray-200 hover:border-yellow-500 shadow
-            hover:scale-110 active:scale-95 transition-all duration-100 text-yellow-600"
+          className="rounded-full w-8 h-8 xs:w-9 xs:h-9 flex items-center justify-center text-xl xs:text-2xl font-black bg-gradient-to-br from-gray-100 to-gray-300 border-2 border-gray-200 hover:border-yellow-500 shadow hover:scale-110 active:scale-95 transition-all duration-100 text-yellow-600"
           onClick={e => {
             e.stopPropagation();
             setCantidad((c) => Math.min((producto.stock || 1), c + 1));
@@ -147,14 +134,11 @@ function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
   );
 }
 
-// Página principal: lista de ropa, paginación, modal de confirmación para eliminar
 const Ropa = () => {
   const [ropa, setRopa] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [user, setUser] = useState(null);
-
-  // Para modal de confirmación visual
   const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -179,7 +163,6 @@ const Ropa = () => {
   const totalPages = Math.max(1, Math.ceil(ropa.length / ITEMS_PER_PAGE));
   const productosPagina = ropa.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  // Eliminar prenda solo con confirmación visual
   const handleEliminarConfirm = async () => {
     if (!deleteId) return;
     setDeleteLoading(true);
@@ -210,7 +193,6 @@ const Ropa = () => {
       <h1 className="text-3xl xs:text-4xl font-extrabold mb-8 text-center text-yellow-600 drop-shadow">
         Ropa
       </h1>
-      {/* Grid responsive: 1 columna móvil, 2 en sm, 3 en md+ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 xs:gap-10 md:gap-12 place-items-center w-full">
         {productosPagina.map((producto) => (
           <RopaCard
@@ -223,7 +205,6 @@ const Ropa = () => {
           />
         ))}
       </div>
-      {/* Modal visual profesional */}
       <ModalConfirmacion
         abierto={!!deleteId}
         titulo="Confirmar eliminación"
@@ -234,7 +215,6 @@ const Ropa = () => {
         onCancelar={() => setDeleteId(null)}
         loading={deleteLoading}
       />
-      {/* Paginación */}
       <div className="flex items-center justify-center mt-8 gap-8">
         <button
           className="rounded-full border-2 border-yellow-400 p-3 text-2xl font-bold transition disabled:opacity-40"
