@@ -20,7 +20,7 @@ jobs:
         with:
           major_pattern: "major"
           minor_pattern: "feat"
-          format: "${{ steps.version.outputs.version }}"
+          format: "${{major}}.${{minor}}.${{patch}}"
 
       - name: Docker login
         env:
