@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Mail, Lock, Eye, EyeOff, Phone, MapPin } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { trSupabase } from "@/utils/supabaseErrorsES"; // util de traducción
 
 export default function LoginModal({ onClose }) {
   const [activeTab, setActiveTab] = useState("login");
@@ -14,6 +15,10 @@ export default function LoginModal({ onClose }) {
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  /* flags para evitar doble clic y disparar el rate‑limit de Supabase */
+  const [loadingLogin, setLoadingLogin] = useState(false);
+  const [loadingSignUp, setLoadingSignUp] = useState(false);
+
   useEffect(() => {
     document.body.classList.add("overflow-hidden");
     return () => {
@@ -25,12 +30,16 @@ export default function LoginModal({ onClose }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  /* ------------------------- REGISTRO ------------------------- */
   const handleRegister = async () => {
+    if (loadingSignUp) return; // evita segundo envío
     try {
       if (!formData.email || !formData.password || !formData.name) {
-        setMessage("Por favor llena todos los campos obligatorios.");
+        setMessage("⚠️ Por favor llena todos los campos obligatorios.");
         return;
       }
+
+      setLoadingSignUp(true);
       const response = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -43,56 +52,68 @@ export default function LoginModal({ onClose }) {
           },
         },
       });
+      setLoadingSignUp(false);
 
       if (response.error) {
-        if (response.error.message.includes("User already registered")) {
-          setMessage("⚠️ Esta cuenta ya está registrada.");
-        } else {
-          setMessage("❌ Error: " + response.error.message);
-        }
-      } else if (response.data?.user) {
+        setMessage(trSupabase(response.error));
+        return;
+      }
+
+      // Si el usuario se creó, insertamos su perfil en la tabla "usuarios"
+      if (response.data?.user) {
         const { id } = response.data.user;
-        const { error: insertError } = await supabase
-          .from("usuarios")
-          .insert([
-            {
-              id,
-              nombre: formData.name,
-              correo: formData.email,
-              telefono: formData.telefono,
-              direccion: formData.direccion,
-              rol: "cliente",
-              verificado: false,
-            },
-          ]);
+        const { error: insertError } = await supabase.from("usuarios").insert([
+          {
+            id,
+            nombre: formData.name,
+            correo: formData.email,
+            telefono: formData.telefono,
+            direccion: formData.direccion,
+            rol: "cliente",
+            verificado: false,
+          },
+        ]);
+
         if (insertError && insertError.code !== "23505") {
-          setMessage("Error al guardar en la base de datos: " + insertError.message);
+          setMessage(trSupabase(insertError));
         } else {
           setMessage("✅ Cuenta creada. Revisa tu correo.");
         }
       }
     } catch (e) {
       setMessage("❌ Error inesperado: " + e.message);
+      setLoadingSignUp(false);
     }
   };
 
+  /* -------------------------- LOGIN --------------------------- */
   const handleLogin = async () => {
+    if (loadingLogin) return;
     try {
+      setLoadingLogin(true);
       const response = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
+      setLoadingLogin(false);
+
       if (response.error) {
-        setMessage("❌ Error: " + response.error.message);
-      } else if (response.data?.user) {
+        setMessage(trSupabase(response.error));
+        return;
+      }
+
+      if (response.data?.user) {
         setMessage("✅ Sesión iniciada.");
         localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // Verifica que el perfil exista en la tabla "usuarios"
         const user = response.data.user;
         const { data: existe } = await supabase
           .from("usuarios")
           .select("id")
           .eq("id", user.id)
           .single();
+
         if (!existe) {
           await supabase.from("usuarios").insert([
             {
@@ -106,22 +127,28 @@ export default function LoginModal({ onClose }) {
             },
           ]);
         }
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        /* refresca UI */
+        setTimeout(() => window.location.reload(), 1000);
       }
     } catch (e) {
       setMessage("❌ Error inesperado: " + e.message);
+      setLoadingLogin(false);
     }
   };
 
+  /* -------------------------- UI ----------------------------- */
   const renderForm = () => {
     switch (activeTab) {
       case "login":
         return (
           <>
-            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-5 xs:mb-6">Bienvenido</h2>
-            <label className="text-sm text-gray-700 flex items-center gap-2"><Mail className="w-4 h-4" /> Correo</label>
+            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-5 xs:mb-6">
+              Bienvenido
+            </h2>
+            {/* CORREO */}
+            <label className="text-sm text-gray-700 flex items-center gap-2">
+              <Mail className="w-4 h-4" /> Correo
+            </label>
             <input
               name="email"
               type="email"
@@ -130,7 +157,10 @@ export default function LoginModal({ onClose }) {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg text-black"
             />
-            <label className="text-sm text-gray-700 flex items-center gap-2 mt-4"><Lock className="w-4 h-4" /> Contraseña</label>
+            {/* CONTRASEÑA */}
+            <label className="text-sm text-gray-700 flex items-center gap-2 mt-4">
+              <Lock className="w-4 h-4" /> Contraseña
+            </label>
             <div className="relative">
               <input
                 name="password"
@@ -146,27 +176,45 @@ export default function LoginModal({ onClose }) {
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
             <button
               type="button"
               onClick={handleLogin}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg font-semibold mt-6 transition"
+              disabled={loadingLogin}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg font-semibold mt-6 transition disabled:opacity-60"
             >
-              Iniciar Sesión
+              {loadingLogin ? "Entrando…" : "Iniciar Sesión"}
             </button>
             <div className="flex flex-wrap justify-center space-x-3 xs:space-x-4 mt-5 xs:mt-6 text-sm">
-              <span className="text-yellow-600 cursor-pointer" onClick={() => setActiveTab("recover")}>Recuperar contraseña</span>
+              <span
+                className="text-yellow-600 cursor-pointer"
+                onClick={() => setActiveTab("recover")}
+              >
+                Recuperar contraseña
+              </span>
               <span className="text-gray-400">|</span>
-              <span className="text-yellow-600 cursor-pointer" onClick={() => setActiveTab("register")}>Registrarse</span>
+              <span
+                className="text-yellow-600 cursor-pointer"
+                onClick={() => setActiveTab("register")}
+              >
+                Registrarse
+              </span>
             </div>
           </>
         );
+
       case "register":
         return (
           <>
-            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-3 xs:mb-4">Registro</h2>
+            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-3 xs:mb-4">
+              Registro
+            </h2>
             <input
               name="name"
               type="text"
@@ -210,12 +258,13 @@ export default function LoginModal({ onClose }) {
             <button
               type="button"
               onClick={handleRegister}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg font-semibold mt-4 transition"
+              disabled={loadingSignUp}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg font-semibold mt-4 transition disabled:opacity-60"
             >
-              Crear cuenta
+              {loadingSignUp ? "Creando…" : "Crear cuenta"}
             </button>
             <p className="text-sm text-center text-gray-500 mt-4">
-              ¿Ya tienes cuenta?{" "}
+              ¿Ya tienes cuenta? {" "}
               <button
                 type="button"
                 onClick={() => setActiveTab("login")}
@@ -226,22 +275,28 @@ export default function LoginModal({ onClose }) {
             </p>
           </>
         );
+
       case "recover":
         return (
           <>
-            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-3 xs:mb-4">Recuperar contraseña</h2>
+            <h2 className="text-2xl xs:text-3xl font-bold text-center text-gray-800 mb-3 xs:mb-4">
+              Recuperar contraseña
+            </h2>
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
                 setMessage("");
                 try {
-                  const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-                    redirectTo: window.location.origin + "/reset-password",
-                  });
+                  const { error } = await supabase.auth.resetPasswordForEmail(
+                    formData.email,
+                    { redirectTo: window.location.origin + "/reset-password" }
+                  );
                   if (error) {
-                    setMessage("❌ " + error.message);
+                    setMessage(trSupabase(error));
                   } else {
-                    setMessage("🔗 Si tu correo está registrado, recibirás el enlace para cambiar la contraseña. Revisa tu SPAM.");
+                    setMessage(
+                      "🔗 Si tu correo está registrado, recibirás el enlace para cambiar la contraseña. Revisa tu SPAM."
+                    );
                   }
                 } catch (err) {
                   setMessage("❌ Error inesperado: " + err.message);
@@ -267,7 +322,7 @@ export default function LoginModal({ onClose }) {
               </button>
             </form>
             <p className="text-sm text-center text-gray-500 mt-4">
-              ¿Ya tienes cuenta?{" "}
+              ¿Ya tienes cuenta? {" "}
               <button
                 type="button"
                 onClick={() => setActiveTab("login")}
@@ -286,20 +341,25 @@ export default function LoginModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-[60] bg-black bg-opacity-60 flex items-center justify-center">
       <div className="bg-white p-5 xs:p-8 rounded-2xl shadow-xl w-full max-w-xs xs:max-w-md sm:max-w-lg relative animate-fade-in">
+        {/* Close */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-2xl font-bold text-gray-500 hover:text-black"
         >
           ×
         </button>
+        {/* Mensaje global */}
         {message && (
-          <div className="mb-4 text-sm text-center text-yellow-700 font-medium">{message}</div>
+          <div className="mb-4 text-sm text-center text-yellow-700 font-medium">
+            {message}
+          </div>
         )}
         <div className="flex flex-col gap-3">{renderForm()}</div>
       </div>
+      {/* Animación */}
       <style>{`
         @keyframes fade-in { from { opacity: 0; transform: translateY(-30px);} to { opacity: 1; transform: translateY(0);} }
-        .animate-fade-in { animation: fade-in 0.4s cubic-bezier(.16,1.2,.52,1.11);}
+        .animate-fade-in { animation: fade-in 0.4s cubic-bezier(.16,1.2,.52,1.11);} 
       `}</style>
     </div>
   );

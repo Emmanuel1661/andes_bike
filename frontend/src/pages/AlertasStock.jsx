@@ -13,9 +13,9 @@ export default function AlertasStock() {
       const { data } = await supabase
         .from("alertas_stock")
         .select(`
-          id, umbral, alerta_activada, producto_id,
+          id,umbral,alerta_activada,producto_id,
           productos:producto_id (
-            nombre, stock, tipo, marca, descripcion
+            nombre,stock,tipo,marca,descripcion
           )
         `)
         .eq("alerta_activada", true)

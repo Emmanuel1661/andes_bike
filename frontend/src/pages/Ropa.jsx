@@ -24,7 +24,7 @@ function getGeneroIcono(genero) {
   return null;
 }
 
-function RopaCard({ producto, addToCart, navigate, user, onEliminarClick }) {
+function RopaCard({ producto,addToCart,navigate,user,onEliminarClick }) {
   const [cantidad, setCantidad] = useState(1);
 
   useEffect(() => {

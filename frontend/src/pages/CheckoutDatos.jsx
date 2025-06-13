@@ -9,7 +9,7 @@ const NEQUI_PHONE = "3016146956";
 
 export default function CheckoutDatos() {
   const navigate = useNavigate();
-  const { cart, user, clearCart, loadingCart } = useCart();
+  const {cart,user,clearCart,loadingCart } = useCart();
 
   const [form, setForm] = useState({
     nombre: user?.nombre || "",

@@ -9,7 +9,7 @@ import ModalConfirmacion from "../components/ModalConfirmacion";
 const ITEMS_PER_PAGE = 6;
 const ADMIN_EMAIL = "emanuelotero710@gmail.com";
 
-function RepuestoCard({ producto, addToCart, navigate, user, handleEliminarClick }) {
+function RepuestoCard({ producto,addToCart,navigate,user,handleEliminarClick }) {
   const [cantidad, setCantidad] = useState(1);
 
   useEffect(() => {

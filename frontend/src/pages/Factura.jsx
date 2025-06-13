@@ -11,7 +11,7 @@ const NOMBRE_TIENDA = "AndesBike";
 const CORREO_TIENDA = "andesbike@bicis.com";
 const TEL_TIENDA = "+57 301 234 5678";
 const WHATSAPP_TIENDA = "+57 301 614 6956";
-const DIR_TIENDA = "Cra. 14 #7c-2 a 7c-214, zarzal valle, Colombia";
+const DIR_TIENDA = "Cra. 14 #7c-2 a 7c-214,zarzal valle,Colombia";
 
 // NEQUI
 const NEQUI_PHONE = "3016146956"; // Cambia por el número Nequi sin el +57

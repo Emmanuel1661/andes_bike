@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import { Link } from "react-router-dom";
 import AlertasStock from "./AlertasStock";
 
-function EditFacturaModal({ factura, onClose, onSave }) {
+function EditFacturaModal({ factura,onClose,onSave }) {
   // Aquí va la implementación si la tienes
   return null; // placeholder
 }

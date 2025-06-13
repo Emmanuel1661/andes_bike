@@ -9,7 +9,7 @@ import ModalConfirmacion from "../components/ModalConfirmacion";
 
 const ADMIN_EMAIL = "emanuelotero710@gmail.com";
 
-function OfertaCard({ producto, addToCart, user, onDeleteClick }) {
+function OfertaCard({producto,addToCart,user,onDeleteClick }) {
   const [cantidad, setCantidad] = useState(1);
   const navigate = useNavigate();
 

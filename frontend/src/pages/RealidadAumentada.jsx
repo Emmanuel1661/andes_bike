@@ -1,76 +1,115 @@
-/* eslint-disable no-unused-vars */
-// src/pages/RealidadAumentada.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import QRCode from "react-qr-code"; // <- Generador QR dinámico
-import { Link } from "react-router-dom";
+import QRCode from "react-qr-code";
+import { useNavigate } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa";
+
+const ADMIN_EMAIL = "emanuelotero710@gmail.com";
+const basePublicUrl = "https://andes-bike.onrender.com";
 
 export default function RealidadAumentada() {
-  const [bicis, setBicis] = useState([]);
+  const [bicis3D, setBicis3D] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [eliminando, setEliminando] = useState(null);
+  const navigate = useNavigate();
+
+  // Detecta si es admin
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const esAdmin = user?.email === ADMIN_EMAIL;
 
   useEffect(() => {
-    const fetchBicis = async () => {
-      setLoading(true);
-      // Solo trae bicis que tengan modelo glb y usdz
-      const { data, error } = await supabase
-        .from("productos")
-        .select("*")
-        .not("glb_url", "is", null)
-        .not("usdz_url", "is", null); // <-- usa usdz_url ahora
-      setBicis(data || []);
-      setLoading(false);
-    };
-    fetchBicis();
+    fetch3DBicis();
   }, []);
 
+  async function fetch3DBicis() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("productos")
+      // aquí quitamos los espacios: "id,nombre,precio,imagen,glb_url,usdz_url"
+      .select("id,nombre,precio,imagen,glb_url,usdz_url")
+      .not("glb_url", "is", null)
+      .not("usdz_url", "is", null);
+    if (error) {
+      alert("Error cargando bicis 3D: " + error.message);
+    } else {
+      setBicis3D(data);
+    }
+    setLoading(false);
+  }
+
+  async function eliminarBici(id) {
+    if (!window.confirm("¿Seguro que deseas eliminar esta bici 3D?")) return;
+    setEliminando(id);
+    const { error } = await supabase
+      .from("productos")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      alert("Error eliminando: " + error.message);
+    } else {
+      setBicis3D((b) => b.filter((x) => x.id !== id));
+    }
+    setEliminando(null);
+  }
+
+  if (loading) return <p>Cargando bicicletas con realidad aumentada...</p>;
+  if (bicis3D.length === 0) return <p>No hay bicicletas con modelos 3D disponibles.</p>;
+
   return (
-    <div className="flex flex-col items-center py-10 min-h-screen">
-      <h2 className="text-3xl font-bold mb-8">Bicicletas con Realidad Aumentada</h2>
-      {loading ? (
-        <p>Cargando...</p>
-      ) : (
-        <div className="flex flex-wrap justify-center gap-8 w-full max-w-5xl">
-          {bicis.length === 0 && <p>No hay bicis con realidad aumentada.</p>}
-          {bicis.map((bici) => (
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">
+        Bicicletas con Realidad Aumentada
+      </h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        {bicis3D.map((bici) => {
+          const qrUrl = `${basePublicUrl}/ar-view/${bici.id}`;
+          return (
             <div
               key={bici.id}
-              className="bg-white rounded-3xl shadow-2xl flex flex-col items-center w-[370px] mb-6 pt-6 pb-8 px-4"
+              className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center relative"
             >
-              {/* Imagen bici */}
-              {bici.imagen && (
-                <div className="w-72 h-52 bg-gray-100 flex items-center justify-center rounded-xl mb-4" style={{ boxShadow: "0 2px 20px 0 rgba(0,0,0,0.08)" }}>
-                  <img src={bici.imagen} alt={bici.nombre} className="max-w-[260px] max-h-[180px] object-contain" />
+              {esAdmin && (
+                <div className="absolute top-3 right-3 flex gap-3">
+                  <button
+                    onClick={() => navigate(`/admin/productos/editar/${bici.id}`)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2"
+                    title="Editar"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => eliminarBici(bici.id)}
+                    className={`bg-red-500 hover:bg-red-600 text-white rounded-full p-2 ${
+                      eliminando === bici.id ? "opacity-60 cursor-not-allowed" : ""
+                    }`}
+                    disabled={eliminando === bici.id}
+                    title="Eliminar"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               )}
-              <h3 className="text-xl font-bold mb-2 text-center">{bici.nombre}</h3>
-              <p className="text-gray-700 mb-2 text-center">{bici.descripcion}</p>
-
-              {/* Genera QR que apunta a la página intermedia de AR */}
-              <div className="flex justify-center items-center w-full my-2">
-                <QRCode
-                  value={`${window.location.origin}/ar-view/${bici.id || bici.slug || bici.nombre.replace(/\s+/g, '-').toLowerCase()}`}
-                  size={164}
-                  bgColor="#fff"
-                  fgColor="#000"
-                  level="H"
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1 text-center">
-                Escanea para ver en 3D en tu móvil (iPhone & Android)
+              <img
+                src={bici.imagen}
+                alt={bici.nombre}
+                className="w-48 h-48 object-contain mb-4"
+              />
+              <h3 className="font-semibold text-center mb-1">{bici.nombre}</h3>
+              <p className="text-green-700 font-bold mb-4">${bici.precio}</p>
+              <QRCode value={qrUrl} size={128} className="mb-4" />
+              <p className="text-center text-xs text-gray-500 mb-4">
+                Escanea para ver en 3D en tu móvil (Android o iPhone)
               </p>
-              {/* Link directo para prueba manual */}
-              <Link
-                to={`/ar-view/${bici.id || bici.slug || bici.nombre.replace(/\s+/g, '-').toLowerCase()}`}
-                className="mt-2 text-blue-600 text-xs underline"
-                target="_blank"
+              <button
+                onClick={() => navigate(`/ar-view/${bici.id}`)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded"
               >
-                Probar modelo AR aquí
-              </Link>
+                Ver Modelo 3D
+              </button>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

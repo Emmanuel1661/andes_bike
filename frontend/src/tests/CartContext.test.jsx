@@ -5,10 +5,10 @@ import React from "react";
 
 // Componente de prueba
 function TestComponent() {
-  const { cart, addToCart, updateQty, removeFromCart, clearCart } = useCart();
+  const { cart,addToCart,updateQty,removeFromCart,clearCart } = useCart();
   return (
     <div>
-      <button onClick={() => addToCart({ id: 1, nombre: "Producto A", precio: 100, qty: 1 })}>Agregar</button>
+      <button onClick={() => addToCart({ id: 1,nombre: "Producto A",precio: 100, qty: 1 })}>Agregar</button>
       <button onClick={() => updateQty(1, 5)}>Actualizar</button>
       <button onClick={() => removeFromCart(1)}>Eliminar</button>
       <button onClick={() => clearCart()}>Vaciar</button>

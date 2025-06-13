@@ -1,31 +1,32 @@
 import { useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Bicicletas from "./pages/Bicicletas";
 import ProductoDetalle from "./pages/ProductoDetalle";
 import Accesorios from "./pages/Accesorios";
 import Repuestos from "./pages/Repuestos";
 import Ropa from "./pages/Ropa";
-import { Routes, Route, Navigate } from "react-router-dom";
+import SearchResults from "./pages/SearchResults";
+import Home from "./pages/Home";
+import Ofertas from "./pages/Ofertas";
+import RealidadAumentada from "./pages/RealidadAumentada";
+import ARView from "./pages/ARView2";
+import ARRedirect from "./pages/ARRedirect";
+import ResetPassword from "./pages/ResetPassword";
+import CheckoutDatos from "./pages/CheckoutDatos";
+import Factura from "./pages/Factura";
+import Contacto from "./pages/Contacto";
+import Perfil from "./pages/Perfil";
 import AdminPanel from "./pages/AdminPanel";
 import AdminProductoNuevo from "./pages/AdminProductoNuevo";
 import AdminProductoEditar from "./pages/AdminProductoEditar";
-import SearchResults from "./pages/SearchResults";
+import AdminProductos3D from "./pages/AdminProductos3D";
 import WhatsAppButton from "./components/WhatsAppButton";
-import CheckoutDatos from "./pages/CheckoutDatos";
-import Factura from "./pages/Factura";
-import Contacto from "./pages/contacto";
-import Ofertas from "./pages/Ofertas";
-import Home from "./pages/Home";
-import RealidadAumentada from "./pages/RealidadAumentada";
-import ResetPassword from "./pages/ResetPassword";
-import ARView from "./pages/ARView2";
 import ModalConfirmacion from "./components/ModalConfirmacion";
-import Perfil from "./pages/Perfil";
-
 
 const ADMIN_EMAIL = "emanuelotero710@gmail.com";
 
-const App = () => {
+export default function App() {
   const [searchGlobal, setSearchGlobal] = useState("");
   const [modalEliminar, setModalEliminar] = useState({
     abierto: false,
@@ -40,17 +41,17 @@ const App = () => {
     }
   })();
 
-  const abrirModalEliminar = (onConfirmar) => {
+  const abrirModalEliminar = (onConfirmar) =>
     setModalEliminar({ abierto: true, onConfirmar });
-  };
-
-  const cerrarModalEliminar = () => {
+  const cerrarModalEliminar = () =>
     setModalEliminar({ abierto: false, onConfirmar: null });
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col relative">
-      <Header searchGlobal={searchGlobal} setSearchGlobal={setSearchGlobal} />
+      <Header
+        searchGlobal={searchGlobal}
+        setSearchGlobal={setSearchGlobal}
+      />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -62,6 +63,7 @@ const App = () => {
             </main>
           }
         />
+
         <Route
           path="/bicicletas"
           element={
@@ -78,6 +80,7 @@ const App = () => {
             </main>
           }
         />
+
         <Route
           path="/accesorios"
           element={
@@ -102,6 +105,7 @@ const App = () => {
             </main>
           }
         />
+
         <Route
           path="/producto/:id"
           element={
@@ -110,6 +114,7 @@ const App = () => {
             </main>
           }
         />
+
         <Route
           path="/realidad-aumentada"
           element={
@@ -118,14 +123,26 @@ const App = () => {
             </main>
           }
         />
+
+        {/* ← Aquí cambié :modelo por :id */}
         <Route
-          path="/ar-view/:modelo"
+          path="/ar-view/:id"
           element={
             <main className="max-w-6xl mx-auto py-6 px-2 text-center bg-white rounded-2xl shadow-lg">
               <ARView />
             </main>
           }
         />
+
+        <Route
+          path="/ar-redirect/:id"
+          element={
+            <main className="max-w-6xl mx-auto py-6 px-2 text-center bg-white rounded-2xl shadow-lg">
+              <ARRedirect />
+            </main>
+          }
+        />
+
         <Route
           path="/buscar"
           element={
@@ -134,6 +151,7 @@ const App = () => {
             </main>
           }
         />
+
         <Route
           path="/checkout-datos"
           element={
@@ -174,10 +192,12 @@ const App = () => {
             </main>
           }
         />
+
+        {/* Rutas admin */}
         <Route
           path="/admin"
           element={
-            user && user.email === ADMIN_EMAIL ? (
+            user?.email === ADMIN_EMAIL ? (
               <AdminPanel />
             ) : (
               <Navigate to="/" />
@@ -187,7 +207,7 @@ const App = () => {
         <Route
           path="/admin/productos/nuevo"
           element={
-            user && user.email === ADMIN_EMAIL ? (
+            user?.email === ADMIN_EMAIL ? (
               <AdminProductoNuevo />
             ) : (
               <Navigate to="/" />
@@ -197,7 +217,7 @@ const App = () => {
         <Route
           path="/admin/productos/editar/:id"
           element={
-            user && user.email === ADMIN_EMAIL ? (
+            user?.email === ADMIN_EMAIL ? (
               <AdminProductoEditar />
             ) : (
               <Navigate to="/" />
@@ -205,11 +225,26 @@ const App = () => {
           }
         />
         <Route
+          path="/admin/productos3d"
+          element={
+            user?.email === ADMIN_EMAIL ? (
+              <AdminProductos3D />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
           path="*"
           element={
             <main className="max-w-6xl mx-auto py-6 px-2 text-center bg-white rounded-2xl shadow-lg">
-              <div className="text-3xl font-bold mt-20 mb-10">Página no encontrada</div>
-              <a href="/" className="underline text-blue-600">Ir al inicio</a>
+              <div className="text-3xl font-bold mt-20 mb-10">
+                Página no encontrada
+              </div>
+              <a href="/" className="underline text-blue-600">
+                Ir al inicio
+              </a>
             </main>
           }
         />
@@ -221,13 +256,12 @@ const App = () => {
         abierto={modalEliminar.abierto}
         mensaje="¿Deseas eliminar este producto?"
         onConfirmar={() => {
-          if (modalEliminar.onConfirmar) modalEliminar.onConfirmar();
+          modalEliminar.onConfirmar?.();
           cerrarModalEliminar();
         }}
         onCancelar={cerrarModalEliminar}
       />
     </div>
   );
-};
+}
 
-export default App;

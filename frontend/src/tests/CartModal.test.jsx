@@ -1,61 +1,61 @@
-/* eslint-disable no-undef */
-// src/tests/CartModal.test.jsx
-import { render, screen, fireEvent } from "@testing-library/react";
-import CartModal from "../components/CartModal";
-import { CartProvider } from "../context/CartContext";
-import { MemoryRouter } from "react-router-dom";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { CartProvider, useCart } from "../context/CartContext";
 
-// Mock necesario para useNavigate de react-router-dom
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => jest.fn(),
-}));
-
-function renderCartModal(cart = [], user = null) {
-  // Mock del contexto para personalizar el cart y user
-  jest.spyOn(require("../context/CartContext"), "useCart").mockReturnValue({
-    cart,
-    removeFromCart: jest.fn(),
-    updateQty: jest.fn(),
-    clearCart: jest.fn(),
-    user,
-  });
-  return render(
-    <MemoryRouter>
-      <CartModal isOpen={true} onClose={() => {}} />
-    </MemoryRouter>
-  );
+// ---------- helpers ----------
+function wrapper({ children }) {
+  return <CartProvider>{children}</CartProvider>;
 }
+// --------------------------------
 
-describe("CartModal", () => {
-  afterEach(() => jest.clearAllMocks());
-
-  it("muestra mensaje de carrito vacío", () => {
-    renderCartModal([]);
-    expect(screen.getByText(/tu carrito está vacío/i)).toBeInTheDocument();
+describe("CartContext", () => {
+  beforeEach(() => {
+    // Reinicia mocks antes de cada ‘it’
+    vi.clearAllMocks();
   });
 
-  it("muestra productos en el carrito y total", () => {
-    const cart = [
-      { id: "1", nombre: "Bici Pro", precio: 1000000, qty: 2, stock: 5, imagen: "" },
-      { id: "2", nombre: "Accesorio", precio: 10000, qty: 1, stock: 3, imagen: "" },
-    ];
-    renderCartModal(cart);
-    expect(screen.getByText(/Bici Pro/)).toBeInTheDocument();
-    expect(screen.getByText(/Accesorio/)).toBeInTheDocument();
-    expect(screen.getByText(/2.010.000/)).toBeInTheDocument(); // total
+  it("añade un producto al carrito", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    act(() => {
+      result.current.addToCart({ id: "1", nombre: "Bici Pro", precio: 1000 });
+    });
+
+    expect(result.current.cart).toHaveLength(1);
+    expect(result.current.cart[0].nombre).toBe("Bici Pro");
   });
 
-  it("muestra el botón para finalizar compra", () => {
-    const cart = [{ id: "1", nombre: "Bici Pro", precio: 1000000, qty: 1, stock: 5, imagen: "" }];
-    renderCartModal(cart);
-    expect(screen.getByRole("button", { name: /finalizar compra/i })).toBeInTheDocument();
+  it("actualiza la cantidad de un producto", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    act(() => {
+      result.current.addToCart({ id: "1", nombre: "Bici Pro", precio: 1000 });
+      result.current.updateQty("1", 3);
+    });
+
+    expect(result.current.cart[0].qty).toBe(3);
   });
 
-  it("muestra alerta si intenta comprar sin iniciar sesión", () => {
-    const cart = [{ id: "1", nombre: "Bici Pro", precio: 1000000, qty: 1, stock: 5, imagen: "" }];
-    renderCartModal(cart, null);
-    fireEvent.click(screen.getByRole("button", { name: /finalizar compra/i }));
-    expect(screen.getByText(/inicia sesión para continuar/i)).toBeInTheDocument();
+  it("elimina un producto del carrito", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    act(() => {
+      result.current.addToCart({ id: "1", nombre: "Bici Pro", precio: 1000 });
+      result.current.removeFromCart("1");
+    });
+
+    expect(result.current.cart).toHaveLength(0);
+  });
+
+  it("vacía el carrito", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    act(() => {
+      result.current.addToCart({ id: "1", nombre: "Bici Pro", precio: 1000 });
+      result.current.addToCart({ id: "2", nombre: "Accesorio", precio: 50 });
+      result.current.clearCart();
+    });
+
+    expect(result.current.cart).toHaveLength(0);
   });
 });

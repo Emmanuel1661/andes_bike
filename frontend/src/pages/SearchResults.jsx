@@ -11,7 +11,7 @@ export default function SearchResults({ search }) {
       setLoading(true);
       const { data } = await supabase
         .from("productos")
-        .select("id, nombre, precio, imagen, tipo, especificaciones, marca")
+        .select("id,nombre,precio,imagen,tipo,especificaciones,marca")
         .or(
           [
             `nombre.ilike.%${search}%`,

@@ -1,8 +1,18 @@
 /* eslint-disable no-undef */
 // src/tests/ProductoCard.test.jsx
+
+import { vi } from "vitest";
+
+// 👇 MOCK explícito para el hook usado en ProductoCard
+vi.mock("../context/FavoritosContext", () => ({
+  useFavoritos: () => ({
+    favoritos: [],
+    toggleFavorito: vi.fn(),
+  }),
+}));
+
 import { render, screen, fireEvent } from "@testing-library/react";
 import ProductoCard from "../components/ProductoCard";
-import { vi } from "vitest";
 
 const producto = {
   id: "1",

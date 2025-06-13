@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaWhatsapp, FaPhone, FaMapMarkerAlt, FaEnvelope, FaInstagram, FaFacebook, FaTwitter, FaTiktok, FaYoutube, FaClock } from "react-icons/fa";
+import { FaWhatsapp,FaPhone,FaMapMarkerAlt,FaEnvelope,FaInstagram,FaFacebook,FaTwitter,FaTiktok,FaYoutube,FaClock } from "react-icons/fa";
 import logoAndesBike from "../assets/logo.png";
 import { supabase } from "../lib/supabaseClient"; // Ajusta la ruta si es necesario
 

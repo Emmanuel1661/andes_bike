@@ -22,7 +22,7 @@ export default function Register() {
     setMensaje(null)
     setLoading(true)
 
-    const { nombre, correo, contraseña, telefono, direccion } = form
+    const {nombre,correo,contraseña,telefono,direccion } = form
 
     if (!correo || !contraseña || !nombre) {
       setMensaje('Por favor completa los campos obligatorios.')
@@ -35,7 +35,7 @@ export default function Register() {
       email: correo,
       password: contraseña,
       options: {
-        data: { nombre, telefono, direccion, rol: 'cliente' }
+        data: { nombre,telefono,direccion,rol: 'cliente' }
       }
     })
 

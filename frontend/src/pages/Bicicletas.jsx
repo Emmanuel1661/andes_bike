@@ -154,7 +154,7 @@ export default function Bicicletas() {
       setError("");
       let { data, error } = await supabase
         .from("productos")
-        .select("id, nombre, precio, imagen, imagenes, tipo, especificaciones, categoria_id, stock")
+        .select("id,nombre,precio,imagen,imagenes,tipo,especificaciones,categoria_id,stock")
         .in("categoria_id", [1, 2, 3])
         .order("id", { ascending: true });
       if (error) setError(error.message);

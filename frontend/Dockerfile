@@ -1,13 +1,15 @@
 # Etapa 1: Construcción del frontend
 FROM node:18-alpine AS build
+
 WORKDIR /app
 
 # Copiar archivos de configuración y dependencias
-COPY frontend/package*.json ./
-COPY frontend/vite.config.js ./
-COPY frontend/postcss.config.js ./
-COPY frontend/tailwind.config.js ./
-COPY frontend/ ./
+COPY package*.json ./
+COPY vite.config.js ./
+COPY postcss.config.js ./
+COPY tailwind.config.js ./
+COPY nginx.conf ./nginx.conf
+COPY . .  # Aquí copias todo lo necesario, ya estás en frontend/
 
 # Instalar dependencias
 RUN npm install
@@ -19,7 +21,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copiar configuración personalizada de Nginx
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copiar resultado del build al servidor
 COPY --from=build /app/dist /usr/share/nginx/html
