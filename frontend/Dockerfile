@@ -1,31 +1,18 @@
-# Etapa 1: Construcción del frontend
-FROM node:18-alpine AS build
+# Etapa 1: Build de la app
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copiar archivos de configuración y dependencias
 COPY package*.json ./
-COPY vite.config.js ./
-COPY postcss.config.js ./
-COPY tailwind.config.js ./
-COPY nginx.conf ./nginx.conf
-COPY . .  # Aquí copias todo lo necesario, ya estás en frontend/
+COPY vite.config.js .
+COPY tailwind.config.js .
+COPY postcss.config.js .
+COPY . .
 
-# Instalar dependencias
 RUN npm install
-
-# Generar build de producción
 RUN npm run build
 
-# Etapa 2: Servidor con Nginx para servir archivos estáticos
+# Etapa 2: Servir con Nginx
 FROM nginx:alpine
-
-# Copiar configuración personalizada de Nginx
-COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copiar resultado del build al servidor
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
