@@ -15,7 +15,7 @@ import ARRedirect from "./pages/ARRedirect";
 import ResetPassword from "./pages/ResetPassword";
 import CheckoutDatos from "./pages/CheckoutDatos";
 import Factura from "./pages/Factura";
-import Contacto from "./pages/Contacto";
+import Contacto from "./pages/contacto";
 import Perfil from "./pages/Perfil";
 import AdminPanel from "./pages/AdminPanel";
 import AdminProductoNuevo from "./pages/AdminProductoNuevo";
